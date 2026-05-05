@@ -1,16 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUser, FaEnvelope, FaLock, FaUserPlus } from "react-icons/fa";
-import { registerUser, notifyAuthChange } from "../api/auth";
+import { FaEnvelope, FaLock, FaSignInAlt } from "react-icons/fa";
+import { loginUser, notifyAuthChange } from "../api/auth";
 
-const Register = () => {
+const Login = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -25,38 +20,19 @@ const Register = () => {
     setError("");
     setSuccess("");
 
-    if (
-      !formData.name ||
-      !formData.email ||
-      !formData.password ||
-      !formData.confirmPassword
-    ) {
+    if (!formData.email || !formData.password) {
       setError("Veuillez remplir tous les champs.");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError("Le mot de passe doit contenir au moins 6 caractères.");
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Les mots de passe ne correspondent pas.");
       return;
     }
 
     try {
       setLoading(true);
-      const data = await registerUser({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      });
+      const data = await loginUser(formData);
 
       localStorage.setItem("autoclickToken", data.token);
       localStorage.setItem("autoclickUser", JSON.stringify(data.user));
       notifyAuthChange();
-      setSuccess("Compte créé avec succès. Redirection...");
+      setSuccess("Connexion réussie. Redirection...");
 
       setTimeout(() => {
         navigate("/");
@@ -70,39 +46,33 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-16 px-6">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-[3rem] shadow-xl overflow-hidden grid grid-cols-1 md:grid-cols-2 border border-gray-100">
-          <div className="bg-linear-to-br from-[#00adef] via-[#0088cc] to-[#005f99] text-white p-10 md:p-12 flex flex-col justify-center">
+          <div
+            className="text-white p-10 md:p-12 flex flex-col justify-center"
+            style={{
+              background:
+                "linear-gradient(135deg, #00adef 0%, #0088cc 55%, #005f99 100%)",
+            }}
+          >
             <h1 className="text-4xl font-black mb-4 leading-tight">
-              Rejoignez AutoClick
+              Bon retour sur AutoClick
             </h1>
             <p className="text-white/90 font-medium leading-relaxed">
-              Créez votre compte pour accéder aux services auto, à la boutique
-              et au support rapide près de vous.
+              Connectez-vous pour gérer vos services, vos commandes et vos
+              demandes d’assistance en quelques clics.
             </p>
           </div>
 
           <div className="p-8 md:p-10">
             <h2 className="text-2xl font-black text-gray-900 mb-2">
-              Inscription
+              Connexion
             </h2>
             <p className="text-gray-500 font-medium mb-8">
-              Commencez en moins d’une minute.
+              Accédez à votre espace client.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="bg-gray-50 rounded-2xl px-4 py-3 border border-gray-100 flex items-center gap-3">
-                <FaUser className="text-[#00adef]" />
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Nom complet"
-                  className="w-full bg-transparent outline-none font-bold text-gray-800"
-                />
-              </div>
-
               <div className="bg-gray-50 rounded-2xl px-4 py-3 border border-gray-100 flex items-center gap-3">
                 <FaEnvelope className="text-[#00adef]" />
                 <input
@@ -127,18 +97,6 @@ const Register = () => {
                 />
               </div>
 
-              <div className="bg-gray-50 rounded-2xl px-4 py-3 border border-gray-100 flex items-center gap-3">
-                <FaLock className="text-[#00adef]" />
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirmer le mot de passe"
-                  className="w-full bg-transparent outline-none font-bold text-gray-800"
-                />
-              </div>
-
               {error && (
                 <p className="text-red-500 text-sm font-bold">{error}</p>
               )}
@@ -151,17 +109,17 @@ const Register = () => {
                 disabled={loading}
                 className="w-full bg-[#00adef] text-white py-4 rounded-2xl font-black hover:bg-black transition-all border-none cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70"
               >
-                <FaUserPlus /> {loading ? "Inscription..." : "Créer mon compte"}
+                <FaSignInAlt /> {loading ? "Connexion..." : "Se connecter"}
               </button>
             </form>
 
             <p className="mt-6 text-gray-600 font-medium">
-              Vous avez déjà un compte ?{" "}
+              Pas encore de compte ?{" "}
               <Link
-                to="/login"
+                to="/register"
                 className="text-[#00adef] font-black no-underline hover:text-black transition-colors"
               >
-                Se connecter
+                Créer un compte
               </Link>
             </p>
           </div>
@@ -171,4 +129,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;
