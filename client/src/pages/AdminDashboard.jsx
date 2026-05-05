@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaTrash,
@@ -49,12 +49,35 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    if (!isAdmin) {
-      setLoading(false);
-      return;
-    }
+    if (!isAdmin) return;
 
-    loadUsers();
+    let isMounted = true;
+
+    const initializeUsers = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const data = await fetchUsers();
+
+        if (isMounted) {
+          setUsers(data.users || []);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeUsers();
+
+    return () => {
+      isMounted = false;
+    };
   }, [isAdmin]);
 
   const stats = useMemo(() => {

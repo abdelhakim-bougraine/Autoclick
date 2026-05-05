@@ -12,15 +12,14 @@ export async function request(path, options = {}) {
     },
   });
 
+  const rawBody = await response.text();
+
   let data = null;
-  try {
-    data = await response.json();
-  } catch {
+  if (rawBody) {
     try {
-      const text = await response.text();
-      data = text ? { message: text } : null;
+      data = JSON.parse(rawBody);
     } catch {
-      data = null;
+      data = { message: rawBody };
     }
   }
 

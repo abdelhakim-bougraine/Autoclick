@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaLock, FaUserPlus } from "react-icons/fa";
 import { registerUser, notifyAuthChange } from "../api/auth";
