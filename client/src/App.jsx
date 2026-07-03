@@ -1,18 +1,16 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
+import Notification from "./components/Notification";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
 import Store from "./pages/Store";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
+import About from "./pages/About";
+import Sos from "./pages/Sos";
 
-// ملاحظة: تأكد من إنشاء هذه الملفات في مجلد pages لاحقاً
-const About = () => (
-  <div className="p-20 text-center font-bold">
-    Page À Propos (En construction)
-  </div>
-);
 const Support = () => (
   <div className="p-20 text-center font-bold text-[#00adef]">
     Équipe Support (En construction)
@@ -22,35 +20,31 @@ const Support = () => (
 function App() {
   return (
     <Router>
+      <Notification />
       <Layout>
         <Routes>
-          {/* الصفحة الرئيسية: البحث الجغرافي ونظام SOS */}
           <Route path="/" element={<Home />} />
-
-          {/* صفحة الخدمات: غسيل وميكانيك */}
           <Route path="/services" element={<Services />} />
-
-          {/* متجر الإكسسوارات وقطع الغيار */}
           <Route path="/store" element={<Store />} />
-
-          {/* صفحة التسجيل (Register) */}
           <Route path="/register" element={<Register />} />
-
-          {/* صفحة تسجيل الدخول */}
           <Route path="/login" element={<Login />} />
-
-          {/* لوحة تحكم الأدمن */}
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-
-          {/* المسارات الجديدة التي أضفناها للـ Navbar */}
+          <Route
+            path="/admin-dashboard"
+            element={
+              <ProtectedRoute adminOnly>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/about" element={<About />} />
           <Route path="/support" element={<Support />} />
-
-          {/* مسار احتياطي في حال أخطأ المستخدم في الرابط */}
+          <Route path="/sos" element={<Sos />} />
           <Route
             path="*"
             element={
-              <div className="p-20 text-center">404 - Page non trouvée</div>
+              <div className="p-20 text-center font-bold text-red-500">
+                404 - Page non trouvée
+              </div>
             }
           />
         </Routes>

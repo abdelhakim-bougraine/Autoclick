@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+// 🔄 استيراد useNavigate للتنقل المتوافق مع React Router
+import { useNavigate } from 'react-router-dom';
 import { FaSearchLocation, FaTools, FaCar, FaShoppingBag, FaTruckPickup, FaMapMarkerAlt } from 'react-icons/fa';
 
 const Home = () => {
   const [userLocation, setUserLocation] = useState({ lng: null, lat: null });
+  // 🔄 تفعيل الـ hook الخاص بالتنقل
+  const navigate = useNavigate();
 
   const getLocation = () => {
     if (navigator.geolocation) {
@@ -22,7 +26,7 @@ const Home = () => {
   return (
     <div className="bg-gradient-to-b from-[#0088cc] via-[#005f99] to-[#0a192f] min-h-screen font-sans text-left text-white">
       
-      {/* ستايل مخصص لتموج الأيقونات بحال البحر (حركة اختيارية مكملة لـ Tailwind) */}
+      {/* ستايل مخصص لتموج الأيقونات بحال البحر */}
       <style>{`
         @keyframes oceanWave {
           0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -72,7 +76,6 @@ const Home = () => {
             {/* كرت Lavage & Mécanique */}
             <div className="bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-[3rem] text-center transition-all duration-300 hover:translate-y-[-10px] shadow-[0_0_20px_rgba(255,255,255,0.05)] hover:shadow-[0_0_30px_rgba(0,173,239,0.3)] group">
               <div className="relative bg-cyan-500/20 text-[#00adef] w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-3xl">
-                {/* زر أخضر ينبض وكبير */}
                 <span className="flex h-5 w-5 absolute -top-1 -right-1">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-5 w-5 bg-green-500"></span>
@@ -83,9 +86,12 @@ const Home = () => {
               </div>
               <h3 className="text-2xl font-black mb-4 text-white">Lavage & Mécanique</h3>
               <p className="text-cyan-100/70 font-medium mb-8 text-sm leading-relaxed">
-                Réservez un lavage complet ou un diagnostic mécanique chez nos partenaires agréés.
+                Réservez un lavage complet ou un diagnostic mécanique chez nos partners agréés.
               </p>
-              <button className="w-full bg-[#00adef] hover:bg-white hover:text-black text-white py-4 rounded-2xl font-black border-none cursor-pointer transition-all shadow-lg">
+              <button 
+                onClick={() => navigate('/services')}
+                className="w-full bg-[#00adef] hover:bg-white hover:text-black text-white py-4 rounded-2xl font-black border-none cursor-pointer transition-all shadow-lg"
+              >
                 Découvrir
               </button>
             </div>
@@ -93,7 +99,6 @@ const Home = () => {
             {/* كرت Boutique Pièces */}
             <div className="bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-[3rem] text-center transition-all duration-300 hover:translate-y-[-10px] shadow-[0_0_20px_rgba(255,255,255,0.05)] hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] group">
               <div className="relative bg-amber-500/20 text-amber-400 w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-3xl">
-                {/* زر أخضر ينبض وكبير */}
                 <span className="flex h-5 w-5 absolute -top-1 -right-1">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-5 w-5 bg-green-500"></span>
@@ -106,7 +111,10 @@ const Home = () => {
               <p className="text-cyan-100/70 font-medium mb-8 text-sm leading-relaxed">
                 Accessoires, huiles, et pièces de rechange. Tout ce qu'il faut pour votre voiture.
               </p>
-              <button className="w-full bg-amber-500 hover:bg-white hover:text-black text-white py-4 rounded-2xl font-black border-none cursor-pointer transition-all shadow-lg">
+              <button 
+                onClick={() => navigate('/store')}
+                className="w-full bg-amber-500 hover:bg-white hover:text-black text-white py-4 rounded-2xl font-black border-none cursor-pointer transition-all shadow-lg"
+              >
                 Acheter
               </button>
             </div>
@@ -114,7 +122,6 @@ const Home = () => {
             {/* كرت Urgence SOS الاستعجالي */}
             <div className="bg-gradient-to-b from-red-600/30 to-red-950/40 backdrop-blur-md border-2 border-red-500/40 p-8 rounded-[3rem] text-center transition-all duration-300 hover:translate-y-[-10px] shadow-[0_0_25px_rgba(239,68,68,0.2)] hover:shadow-[0_0_40px_rgba(239,68,68,0.6),_0_0_15px_rgba(245,158,11,0.3)] group">
               <div className="relative bg-red-500 text-white w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-3xl">
-                {/* زر أخضر ينبض وكبير جداً للـ SOS */}
                 <span className="flex h-6 w-6 absolute -top-2 -right-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-90"></span>
                   <span className="relative inline-flex rounded-full h-6 w-6 bg-green-500"></span>
@@ -127,7 +134,11 @@ const Home = () => {
               <p className="text-red-100/80 font-medium mb-8 text-sm leading-relaxed">
                 En panne ? Un remorqueur ou un mécanicien mobile arrive chez vous en moins de 30 min.
               </p>
-              <button className="w-full bg-red-600 hover:bg-white hover:text-black text-white py-4 rounded-2xl font-black border-none cursor-pointer transition-all shadow-lg shadow-red-900/50">
+              {/* 🔄 هنا تم التعديل السحري: سيوجهك مباشرة لصفحة الـ SOS الحية */}
+              <button 
+                onClick={() => navigate('/sos')}
+                className="w-full bg-red-600 hover:bg-white hover:text-black text-white py-4 rounded-2xl font-black border-none cursor-pointer transition-all shadow-lg shadow-red-900/50"
+              >
                 Appeler Aide
               </button>
             </div>

@@ -24,7 +24,7 @@ app.use(
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("AutoClick API is running");
+  res.send("server is running");
 });
 
 app.get("/api/auth/users", protect, adminOnly, getUsers);
@@ -33,6 +33,8 @@ app.put("/api/auth/users/:id", protect, adminOnly, updateUser);
 app.delete("/api/auth/users/:id", protect, adminOnly, deleteUser);
 
 app.use("/api/auth", authRoutes);
+
+module.exports = app;
 
 const startServer = async () => {
   try {
@@ -48,4 +50,6 @@ const startServer = async () => {
   }
 };
 
-startServer();
+if (process.env.NODE_ENV !== "production") {
+  startServer();
+}
