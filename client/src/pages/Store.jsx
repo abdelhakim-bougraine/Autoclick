@@ -8,6 +8,7 @@ const Store = () => {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
+  const [failedImages, setFailedImages] = useState(new Set());
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -108,10 +109,11 @@ const Store = () => {
                       className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
                     >
                       <div className="relative pt-[75%] bg-gray-50 overflow-hidden">
-                        {product.image ? (
+                        {!failedImages.has(product._id) && product.image ? (
                           <img
                             src={product.image}
                             alt={product.name}
+                            onError={() => setFailedImages(prev => new Set(prev).add(product._id))}
                             className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (

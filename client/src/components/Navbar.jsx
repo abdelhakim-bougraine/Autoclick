@@ -60,9 +60,8 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* 1. Logo Section */}
         <Link to="/" className="flex items-center gap-2 no-underline">
-          <div className="bg-[#00adef] p-2 rounded-xl">
-            <span className="text-white font-black text-xl">AC</span>
-          </div>
+
+          <img src="/logo/autoclick-logo.png" alt="AutoClick" className="h-10 w-auto" />
           <span className="text-2xl font-black text-gray-900 tracking-tighter">
             Auto<span className="text-[#00adef]">Click</span>
           </span>

@@ -18,7 +18,7 @@ const port = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://autoclick-1.vercel.app"],
   }),
 );
 app.use(express.json());
@@ -32,6 +32,13 @@ app.post("/api/auth/users", protect, adminOnly, createUser);
 app.put("/api/auth/users/:id", protect, adminOnly, updateUser);
 app.delete("/api/auth/users/:id", protect, adminOnly, deleteUser);
 
+const storeRoutes = require("./routes/storeRoutes");
+const garageRoutes = require("./routes/garageRoutes");
+const serviceRoutes = require("./routes/serviceRoutes");
+
+app.use("/api", storeRoutes);
+app.use("/api/garages", garageRoutes);
+app.use("/api/services", serviceRoutes);
 app.use("/api/auth", authRoutes);
 
 module.exports = app;

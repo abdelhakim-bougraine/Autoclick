@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaEnvelope, FaLock, FaSignInAlt } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaSignInAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 import { loginUser, notifyAuthChange } from "../api/auth";
 
 const Login = () => {
@@ -9,6 +9,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,13 +89,21 @@ const Login = () => {
               <div className="bg-gray-50 rounded-2xl px-4 py-3 border border-gray-100 flex items-center gap-3">
                 <FaLock className="text-[#00adef]" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Mot de passe"
                   className="w-full bg-transparent outline-none font-bold text-gray-800"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="bg-transparent border-none text-gray-400 hover:text-gray-700 cursor-pointer text-lg p-0"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
               </div>
 
               {error && (

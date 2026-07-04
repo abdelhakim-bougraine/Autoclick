@@ -8,12 +8,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <Link to="/" className="flex items-center gap-2 no-underline mb-4">
-              <div className="bg-[#00adef] p-2 rounded-xl">
-                <span className="text-white font-black text-xl">AC</span>
-              </div>
+              <img src="/logo/autoclick-logo.png" alt="AutoClick" className="h-12 w-auto" />
               <span className="text-2xl font-black text-white tracking-tighter">
-                Auto<span className="text-[#00adef]">Click</span>
-              </span>
+            Auto<span className="text-[#00adef]">Click</span>
+          </span>
             </Link>
             <p className="text-gray-400 text-sm font-medium leading-relaxed">
               Votre expert auto à proximité. Lavage, mécanique, dépannage et boutique pièces.

@@ -1,6 +1,54 @@
 const Garage = require('../models/Garage');
 
-// جلب أقرب الجراجات (نظام يشبه InDrive)
+exports.getGarages = async (req, res) => {
+  try {
+    const garages = await Garage.find().populate("owner", "name email").sort({ createdAt: -1 });
+    res.json({ garages });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getGarage = async (req, res) => {
+  try {
+    const garage = await Garage.findById(req.params.id).populate("owner", "name email");
+    if (!garage) return res.status(404).json({ message: "Garage introuvable" });
+    res.json(garage);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.createGarage = async (req, res) => {
+  try {
+    const { name, type, location, address, phone } = req.body;
+    const garage = await Garage.create({ name, type, location, address, phone, owner: req.user._id });
+    res.status(201).json(garage);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.updateGarage = async (req, res) => {
+  try {
+    const garage = await Garage.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!garage) return res.status(404).json({ message: "Garage introuvable" });
+    res.json(garage);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.deleteGarage = async (req, res) => {
+  try {
+    const garage = await Garage.findByIdAndDelete(req.params.id);
+    if (!garage) return res.status(404).json({ message: "Garage introuvable" });
+    res.json({ message: "Garage supprimé" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.getNearbyGarages = async (req, res) => {
     try {
         // 1. استلام موقع المستخدم من الـ Frontend
