@@ -2,8 +2,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-const createToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+// 💡 التعديل هنا: زدنا الـ role وسط الـ Token باش يبقا مخزن ومحمي ديما
+const createToken = (userId, role) => {
+  return jwt.sign({ id: userId, role: role }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
 exports.register = async (req, res) => {
@@ -29,7 +30,8 @@ exports.register = async (req, res) => {
       password: hashedPassword,
     });
 
-    const token = createToken(user._id);
+    // 💡 مررنا الـ id والـ role هنايا
+    const token = createToken(user._id, user.role);
 
     res.status(201).json({
       message: "Inscription réussie",
@@ -66,7 +68,8 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Identifiants invalides" });
     }
 
-    const token = createToken(user._id);
+    // 💡 مررنا الـ id والـ role الحقيقي اللي جاي من الداتابيز باش يبقا عاقل عليك أدمن
+    const token = createToken(user._id, user.role);
 
     res.status(200).json({
       message: "Connexion réussie",

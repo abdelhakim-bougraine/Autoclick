@@ -30,14 +30,28 @@ const Login = () => {
       setLoading(true);
       const data = await loginUser(formData);
 
+      // 1. حفظ البيانات في الـ LocalStorage
       localStorage.setItem("autoclickToken", data.token);
       localStorage.setItem("autoclickUser", JSON.stringify(data.user));
       notifyAuthChange();
       setSuccess("Connexion réussie. Redirection...");
 
+      // 2. طباعة البيانات في الـ Console للتحقق المتكامل
+      console.log("=== TEST AUTH ===");
+      console.log("Data user كاملة:", data.user);
+      console.log("الـ Role اللي جاي من الباكند هو:", data.user?.role);
+
+      // 3. التوجيه الذكي حسب الـ role
       setTimeout(() => {
-        navigate("/");
+        if (data.user && data.user.role === "admin") {
+          console.log("الشرط تحقق بنجاح! غادي نصيفطك للأدمن دابا.");
+          navigate("/admin-dashboard"); 
+        } else {
+          console.log("الشرط لم يتحقق، الرول ماشي أدمن أولا كاين نقص في البيانات.");
+          navigate("/"); 
+        }
       }, 800);
+      
     } catch (err) {
       setError(err.message);
     } finally {

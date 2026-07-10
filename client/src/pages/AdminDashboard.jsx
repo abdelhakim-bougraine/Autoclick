@@ -12,13 +12,6 @@ import {
   FaBox,
   FaSignOutAlt,
   FaSpinner,
-  FaClipboardList,
-  FaShower,
-  FaCogs,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaCheckCircle,
-  FaTimesCircle
 } from "react-icons/fa";
 import {
   createUser,
@@ -42,52 +35,10 @@ import {
 import { getStoredUser, notifyAuthChange, clearAuth } from "../api/auth";
 import { showNotification } from "../components/Notification";
 
-// 📦 إضافة صنف الـ Demandes لتبديل القوائم
 const TABS = [
   { key: "users", label: "Utilisateurs", icon: FaUsers },
-  { key: "demandes", label: "Demandes & Services", icon: FaClipboardList },
   { key: "garages", label: "Garages", icon: FaWarehouse },
   { key: "products", label: "Produits", icon: FaBox },
-];
-
-// البيانات الوهمية للطلبات (Lavage / Mécanicien / Boutique) لعرضها ديريكت أمام اللجنة
-const INITIAL_DEMANDES = [
-  {
-    id: "req1",
-    firstName: "Amine",
-    lastName: "Tazi",
-    phone: "0655443322",
-    location: "Casablanca, Ain Chock",
-    type: "Mécanicien",
-    problem: "Surchauffe moteur et bruit bizarre au niveau des freins avant lors du freinage."
-  },
-  {
-    id: "req2",
-    firstName: "Youssef",
-    lastName: "Alami",
-    phone: "0677889900",
-    location: "Rabat, Agdal",
-    type: "Lavage",
-    problem: "Lavage complet intérieur/extérieur à domicile + Polissage des phares."
-  },
-  {
-    id: "req3",
-    firstName: "Sanaa",
-    lastName: "Benjelloun",
-    phone: "0611223344",
-    location: "Casablanca, Maarif",
-    type: "Lavage",
-    problem: "Nettoyage en profondeur des sièges en tissu après renversement de café."
-  },
-  {
-    id: "req4",
-    firstName: "Karim",
-    lastName: "Mansouri",
-    phone: "0699887766",
-    location: "Tangier, Malabata",
-    type: "Boutique",
-    problem: "Commande de 5 Chiffons Microfibres et 1 Shampoing Haute Mousse (Total: 465 DH)."
-  }
 ];
 
 const AdminDashboard = () => {
@@ -98,8 +49,6 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        
-        {/* Header Section */}
         <div className="bg-white rounded-[3rem] shadow-xl p-8 md:p-10 border border-gray-100">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
@@ -110,7 +59,7 @@ const AdminDashboard = () => {
                 Gestion de la plateforme
               </h1>
               <p className="text-gray-500 font-medium mt-2">
-                Gérez les utilisateurs, les demandes de services (Lavage / Mécanique) et la boutique.
+                Gérez les utilisateurs, garages et produits.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -129,9 +78,8 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Tab Selection */}
         <div className="bg-white rounded-[3rem] shadow-xl overflow-hidden border border-gray-100">
-          <div className="flex border-b border-gray-100 overflow-x-auto">
+          <div className="flex border-b border-gray-100">
             {TABS.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -139,7 +87,7 @@ const AdminDashboard = () => {
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex-1 min-w-[150px] flex items-center justify-center gap-2 px-6 py-5 font-black text-sm uppercase tracking-wider transition-all cursor-pointer border-none ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-5 font-black text-sm uppercase tracking-wider transition-all cursor-pointer border-none ${
                     activeTab === tab.key
                       ? "bg-[#00adef]/5 text-[#00adef] border-b-2 border-[#00adef]"
                       : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
@@ -151,10 +99,8 @@ const AdminDashboard = () => {
             })}
           </div>
 
-          {/* Panels view */}
           <div className="p-8">
             {activeTab === "users" && <UsersPanel />}
-            {activeTab === "demandes" && <DemandesPanel />}
             {activeTab === "garages" && <GaragesPanel />}
             {activeTab === "products" && <ProductsPanel />}
           </div>
@@ -164,7 +110,6 @@ const AdminDashboard = () => {
   );
 };
 
-// 👥 1. لوحة التحكم في المستخدمين (محدثة بميزات تحويل الـ Admin والتفعيل)
 const UsersPanel = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -173,11 +118,12 @@ const UsersPanel = () => {
   const [saving, setSaving] = useState(false);
   const [editingUserId, setEditingUserId] = useState("");
   const [formData, setFormData] = useState({
-    name: "", email: "", password: "", role: "customer", status: "active"
+    name: "", email: "", password: "", role: "customer",
   });
 
   useEffect(() => {
     let cancelled = false;
+
     const loadUsers = async () => {
       try {
         setLoading(true);
@@ -190,6 +136,7 @@ const UsersPanel = () => {
         if (!cancelled) setLoading(false);
       }
     };
+
     loadUsers();
     return () => { cancelled = true; };
   }, []);
@@ -214,30 +161,6 @@ const UsersPanel = () => {
     return { total, admins, customers };
   }, [users]);
 
-  // دالة سريعة لتبديل الـ Role بين customer و admin مباشرة من السطر
-  const handleToggleAdmin = async (user) => {
-    const nextRole = user.role === "admin" ? "customer" : "admin";
-    try {
-      await updateUserById(user._id, { name: user.name, email: user.email, role: nextRole });
-      showNotification("Rôle mis à jour avec succès", "success");
-      await reloadUsers();
-    } catch (err) {
-      showNotification(err.message, "error");
-    }
-  };
-
-  // دالة سريعة لتفعيل أو توقيف حساب العميل
-  const handleToggleStatus = async (user) => {
-    const nextStatus = user.status === "inactive" ? "active" : "inactive";
-    try {
-      await updateUserById(user._id, { name: user.name, email: user.email, status: nextStatus });
-      showNotification(`Compte ${nextStatus === "active" ? "activé" : "désactivé"}`, "success");
-      await reloadUsers();
-    } catch (err) {
-      showNotification(err.message, "error");
-    }
-  };
-
   const handleDelete = async (userId) => {
     if (!window.confirm("Supprimer cet utilisateur ?")) return;
     try {
@@ -253,7 +176,7 @@ const UsersPanel = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", email: "", password: "", role: "customer", status: "active" });
+    setFormData({ name: "", email: "", password: "", role: "customer" });
     setEditingUserId("");
   };
 
@@ -264,7 +187,6 @@ const UsersPanel = () => {
       email: user.email || "",
       password: "",
       role: user.role || "customer",
-      status: user.status || "active"
     });
     setError("");
   };
@@ -272,14 +194,14 @@ const UsersPanel = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email || (!editingUserId && !formData.password)) {
-      setError("Le nom, l'email et le mot de passe sont requis.");
+      setError("Name, email and password are required for a new user.");
       return;
     }
 
     try {
       setSaving(true);
       setError("");
-      const payload = { name: formData.name, email: formData.email, role: formData.role, status: formData.status };
+      const payload = { name: formData.name, email: formData.email, role: formData.role };
       if (formData.password) payload.password = formData.password;
 
       if (editingUserId) {
@@ -287,7 +209,7 @@ const UsersPanel = () => {
         const currentUser = getStoredUser();
         const currentUserId = currentUser?._id || currentUser?.id;
         if (currentUserId && currentUserId.toString() === editingUserId.toString()) {
-          const nextStoredUser = { ...currentUser, ...updated.user, _id: updated.user?._id || updated.user?.id || currentUserId };
+          const nextStoredUser = { ...currentUser, ...updated.user, _id: updated.user?._id || updated.user?.id || currentUserId, id: updated.user?.id || updated.user?._id || currentUserId };
           localStorage.setItem("autoclickUser", JSON.stringify(nextStoredUser));
           notifyAuthChange();
         }
@@ -296,6 +218,7 @@ const UsersPanel = () => {
         await createUser(payload);
         showNotification("Utilisateur créé", "success");
       }
+
       resetForm();
       await reloadUsers();
     } catch (err) {
@@ -309,7 +232,6 @@ const UsersPanel = () => {
 
   return (
     <div className="space-y-8">
-      {/* Cards فوقانية كتعطيك شحال كاين */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-gray-50 rounded-[2.5rem] p-6 border border-gray-100">
           <div className="flex items-center gap-3 text-gray-500 font-bold mb-3"><FaUsers className="text-[#00adef]" /> Total</div>
@@ -325,7 +247,6 @@ const UsersPanel = () => {
         </div>
       </div>
 
-      {/* Formulaire */}
       <div className="bg-gray-50 rounded-[2.5rem] p-6 border border-gray-100">
         <div className="flex items-center gap-3 mb-6">
           {editingUserId ? <FaEdit className="text-[#00adef]" /> : <FaPlus className="text-[#00adef]" />}
@@ -354,54 +275,30 @@ const UsersPanel = () => {
         </form>
       </div>
 
-      {/* Tableau */}
       <div className="overflow-x-auto bg-white rounded-[2.5rem] border border-gray-100">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-gray-500 uppercase text-sm">
             <tr>
-              <th className="px-6 py-4">Nom</th>
-              <th className="px-6 py-4">Email</th>
-              <th className="px-6 py-4">Rôle</th>
-              <th className="px-6 py-4">Statut</th>
-              <th className="px-6 py-4 text-center">Actions Administrateur</th>
+              <th className="px-8 py-4">Nom</th>
+              <th className="px-8 py-4">Email</th>
+              <th className="px-8 py-4">Rôle</th>
+              <th className="px-8 py-4">Créé le</th>
+              <th className="px-8 py-4">Action</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
               <tr key={user._id} className="border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
-                <td className="px-6 py-5 font-black text-gray-900">{user.name}</td>
-                <td className="px-6 py-5 text-gray-600">{user.email}</td>
-                <td className="px-6 py-5">
+                <td className="px-8 py-5 font-black text-gray-900">{user.name}</td>
+                <td className="px-8 py-5 text-gray-600">{user.email}</td>
+                <td className="px-8 py-5">
                   <span className={`px-3 py-1 rounded-full text-xs font-black ${user.role === "admin" ? "bg-[#00adef]/10 text-[#00adef]" : "bg-gray-100 text-gray-600"}`}>{user.role}</span>
                 </td>
-                <td className="px-6 py-5">
-                  {user.status === "inactive" ? (
-                    <span className="text-red-500 font-bold flex items-center gap-1 text-xs"><FaTimesCircle /> Inactif</span>
-                  ) : (
-                    <span className="text-green-500 font-bold flex items-center gap-1 text-xs"><FaCheckCircle /> Actif</span>
-                  )}
-                </td>
-                <td className="px-6 py-5">
-                  <div className="flex items-center justify-center gap-2">
-                    {/* زر تغيير الرتبة */}
-                    <button 
-                      type="button" 
-                      onClick={() => handleToggleAdmin(user)} 
-                      className={`px-3 py-1.5 rounded-xl text-xs font-black border-none cursor-pointer text-white ${user.role === 'admin' ? 'bg-gray-600' : 'bg-purple-600'}`}
-                    >
-                      {user.role === "admin" ? "Retirer Admin" : "Rendre Admin"}
-                    </button>
-                    {/* زر التفعيل والتوقيف */}
-                    <button 
-                      type="button" 
-                      onClick={() => handleToggleStatus(user)} 
-                      className={`px-3 py-1.5 rounded-xl text-xs font-black border-none cursor-pointer ${user.status === 'inactive' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'}`}
-                    >
-                      {user.status === "inactive" ? "Activer Account" : "Désactiver"}
-                    </button>
-                    {/* تعديل وحذف */}
-                    <button type="button" onClick={() => handleEdit(user)} className="bg-gray-100 text-gray-800 p-2 rounded-xl border-none cursor-pointer"><FaEdit /></button>
-                    <button type="button" onClick={() => handleDelete(user._id)} disabled={deletingId === user._id} className="bg-red-600 text-white p-2 rounded-xl border-none cursor-pointer"><FaTrash /></button>
+                <td className="px-8 py-5 text-gray-600">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}</td>
+                <td className="px-8 py-5">
+                  <div className="flex items-center gap-2">
+                    <button type="button" onClick={() => handleEdit(user)} className="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-2xl font-black cursor-pointer border-none"><FaEdit /> Edit</button>
+                    <button type="button" onClick={() => handleDelete(user._id)} disabled={deletingId === user._id} className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-2xl font-black disabled:opacity-60 cursor-pointer border-none"><FaTrash /> {deletingId === user._id ? "..." : "Delete"}</button>
                   </div>
                 </td>
               </tr>
@@ -413,136 +310,6 @@ const UsersPanel = () => {
   );
 };
 
-// 📋 2. الـ Panel الجديد الخاص بالطلبات والخدمات (Demandes / Lavage / Mécanicien)
-const DemandesPanel = () => {
-  const [demandes] = useState(INITIAL_DEMANDES);
-  const [activeFilter, setActiveFilter] = useState("Tous");
-
-  // الحساب الديناميكي لإحصائيات الطلبات الفوقانية
-  const stats = useMemo(() => {
-    const total = demandes.length;
-    const lavage = demandes.filter((d) => d.type === "Lavage").length;
-    const mecanicien = demandes.filter((d) => d.type === "Mécanicien").length;
-    const boutique = demandes.filter((d) => d.type === "Boutique").length;
-    return { total, lavage, mecanicien, boutique };
-  }, [demandes]);
-
-  // التصفية الفورية للجدول عند الضغط على أي كارت
-  const filteredDemandes = demandes.filter((d) => {
-    if (activeFilter === "Tous") return true;
-    return d.type === activeFilter;
-  });
-
-  return (
-    <div className="space-y-8">
-      {/* 📊 الكروت التفاعلية للإحصائيات */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div 
-          onClick={() => setActiveFilter("Tous")}
-          className={`p-6 rounded-[2rem] border transition-all duration-300 cursor-pointer shadow-sm flex items-center justify-between ${
-            activeFilter === "Tous" ? "bg-[#00adef] text-white border-[#00adef] scale-105" : "bg-gray-50 text-gray-800 border-gray-100 hover:border-cyan-200"
-          }`}
-        >
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider opacity-80">Total Demandes</p>
-            <h3 className="text-3xl font-black mt-2">{stats.total}</h3>
-          </div>
-          <FaClipboardList className="text-2xl opacity-50" />
-        </div>
-
-        <div 
-          onClick={() => setActiveFilter("Lavage")}
-          className={`p-6 rounded-[2rem] border transition-all duration-300 cursor-pointer shadow-sm flex items-center justify-between ${
-            activeFilter === "Lavage" ? "bg-blue-500 text-white border-blue-500 scale-105" : "bg-gray-50 text-gray-800 border-gray-100 hover:border-blue-200"
-          }`}
-        >
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider opacity-80">Demandes Lavage</p>
-            <h3 className="text-3xl font-black mt-2">{stats.lavage}</h3>
-          </div>
-          <FaShower className="text-2xl opacity-50" />
-        </div>
-
-        <div 
-          onClick={() => setActiveFilter("Mécanicien")}
-          className={`p-6 rounded-[2rem] border transition-all duration-300 cursor-pointer shadow-sm flex items-center justify-between ${
-            activeFilter === "Mécanicien" ? "bg-amber-500 text-white border-amber-500 scale-105" : "bg-gray-50 text-gray-800 border-gray-100 hover:border-amber-200"
-          }`}
-        >
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider opacity-80">Besoin Mécanicien</p>
-            <h3 className="text-3xl font-black mt-2">{stats.mecanicien}</h3>
-          </div>
-          <FaCogs className="text-2xl opacity-50" />
-        </div>
-
-        <div 
-          onClick={() => setActiveFilter("Boutique")}
-          className={`p-6 rounded-[2rem] border transition-all duration-300 cursor-pointer shadow-sm flex items-center justify-between ${
-            activeFilter === "Boutique" ? "bg-purple-500 text-white border-purple-500 scale-105" : "bg-gray-50 text-gray-800 border-gray-100 hover:border-purple-200"
-          }`}
-        >
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider opacity-80">Commandes Boutique</p>
-            <h3 className="text-3xl font-black mt-2">{stats.boutique}</h3>
-          </div>
-          <FaBox className="text-2xl opacity-50" />
-        </div>
-      </div>
-
-      {/* 📋 جدول تفاصيل الزبون والطلب الجغرافي والمشكل بالظبط */}
-      <div className="overflow-x-auto bg-white rounded-[2.5rem] border border-gray-100">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-          <h3 className="font-black text-gray-800 text-lg">
-            {activeFilter === "Tous" ? "Toutes les demandes reçues" : `Filtré par: ${activeFilter}`}
-          </h3>
-          <span className="text-xs bg-[#00adef]/10 text-[#00adef] px-3 py-1 rounded-full font-black">
-            {filteredDemandes.length} demandes
-          </span>
-        </div>
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 text-gray-500 uppercase text-xs tracking-wider">
-            <tr>
-              <th className="px-8 py-4">Client & Contact</th>
-              <th className="px-8 py-4">Service</th>
-              <th className="px-8 py-4">Description du Problème / Commande</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 text-sm">
-            {filteredDemandes.map((d) => (
-              <tr key={d.id} className="hover:bg-gray-50/60 transition-colors">
-                <td className="px-8 py-5">
-                  <div className="font-black text-gray-900">{d.firstName} {d.lastName}</div>
-                  <div className="text-xs text-gray-400 flex items-center gap-1 mt-1">
-                    <FaPhoneAlt className="text-[10px]" /> {d.phone}
-                  </div>
-                  <div className="text-xs text-[#00adef] font-bold flex items-center gap-1 mt-0.5">
-                    <FaMapMarkerAlt className="text-[10px]" /> {d.location}
-                  </div>
-                </td>
-                <td className="px-8 py-5">
-                  <span className={`px-3 py-1 rounded-full text-xs font-black ${
-                    d.type === "Lavage" ? "bg-blue-50 text-blue-600" :
-                    d.type === "Mécanicien" ? "bg-amber-50 text-amber-600" : "bg-purple-50 text-purple-600"
-                  }`}>
-                    {d.type}
-                  </span>
-                </td>
-                <td className="px-8 py-5 max-w-xs">
-                  <p className="text-gray-600 text-xs leading-relaxed bg-gray-50 p-3 rounded-2xl border border-gray-100 font-medium">
-                    {d.problem}
-                  </p>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
-// 🚗 3. لوحة تحكم الكراجات (نفس الكود القديم ديالك بدون أي تعديل خارق)
 const GaragesPanel = () => {
   const [garages, setGarages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -556,6 +323,7 @@ const GaragesPanel = () => {
 
   useEffect(() => {
     let cancelled = false;
+
     const load = async () => {
       try {
         setLoading(true);
@@ -568,6 +336,7 @@ const GaragesPanel = () => {
         if (!cancelled) setLoading(false);
       }
     };
+
     load();
     return () => { cancelled = true; };
   }, []);
@@ -630,7 +399,7 @@ const GaragesPanel = () => {
       resetForm();
       await reloadGarages();
     } catch (err) {
-      showNotification(err.message, "error");
+      showNotification(`Endpoint requis: ${editingId ? "PUT" : "POST"} /api/garages${editingId ? `/${editingId}` : ""} — ${err.message}`, "error");
     } finally {
       setSaving(false);
     }
@@ -644,7 +413,7 @@ const GaragesPanel = () => {
       showNotification("Garage supprimé", "success");
       await reloadGarages();
     } catch (err) {
-      showNotification(err.message, "error");
+      showNotification(`Endpoint requis: DELETE /api/garages/${id} — ${err.message}`, "error");
     } finally {
       setDeletingId("");
     }
@@ -656,7 +425,7 @@ const GaragesPanel = () => {
       showNotification("Abonnement mis à jour", "success");
       await reloadGarages();
     } catch (err) {
-      showNotification(err.message, "error");
+      showNotification(`Endpoint requis: PUT /api/garages/subscription — ${err.message}`, "error");
     }
   };
 
@@ -664,7 +433,10 @@ const GaragesPanel = () => {
 
   return (
     <div className="space-y-8">
-      {error && <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm font-medium">{error}</div>}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm font-medium">{error}</div>
+      )}
+
       <div className="bg-gray-50 rounded-[2.5rem] p-6 border border-gray-100">
         <div className="flex items-center gap-3 mb-6">
           {editingId ? <FaEdit className="text-[#00adef]" /> : <FaPlus className="text-[#00adef]" />}
@@ -685,7 +457,11 @@ const GaragesPanel = () => {
             <button type="submit" disabled={saving} className="inline-flex items-center gap-2 bg-[#00adef] text-white px-6 py-3 rounded-2xl font-black disabled:opacity-60 cursor-pointer border-none">
               <FaSave /> {saving ? "En cours..." : editingId ? "Mettre à jour" : "Créer"}
             </button>
-            {editingId && <button type="button" onClick={resetForm} className="inline-flex items-center gap-2 bg-gray-200 text-gray-900 px-6 py-3 rounded-2xl font-black cursor-pointer border-none">Annuler</button>}
+            {editingId && (
+              <button type="button" onClick={resetForm} className="inline-flex items-center gap-2 bg-gray-200 text-gray-900 px-6 py-3 rounded-2xl font-black cursor-pointer border-none">
+                Annuler
+              </button>
+            )}
           </div>
         </form>
       </div>
@@ -702,25 +478,38 @@ const GaragesPanel = () => {
             </tr>
           </thead>
           <tbody>
-            {garages.map((g) => (
-              <tr key={g._id} className="border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
-                <td className="px-8 py-5 font-black text-gray-900">{g.name}</td>
-                <td className="px-8 py-5">
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-[#00adef]/10 text-[#00adef]">{g.type}</span>
-                </td>
-                <td className="px-8 py-5 text-gray-600 text-sm">{g.address || "-"}</td>
-                <td className="px-8 py-5">
-                  <span className={`text-xs font-black ${g.isSubscribed ? "text-green-600" : "text-red-500"}`}>{g.isSubscribed ? "Actif" : "Inactif"}</span>
-                  <button type="button" onClick={() => handleSubscription(g._id, 1)} className="ml-2 text-xs bg-gray-100 px-2 py-1 rounded-lg font-bold cursor-pointer border-none hover:bg-gray-200">+1 mois</button>
-                </td>
-                <td className="px-8 py-5">
-                  <div className="flex items-center gap-2">
-                    <button type="button" onClick={() => handleEdit(g)} className="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-2xl font-black cursor-pointer border-none"><FaEdit /> Edit</button>
-                    <button type="button" onClick={() => handleDelete(g._id)} disabled={deletingId === g._id} className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-2xl font-black disabled:opacity-60 cursor-pointer border-none"><FaTrash /> {deletingId === g._id ? "..." : "Delete"}</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {garages.length === 0 ? (
+              <tr><td colSpan={5} className="px-8 py-12 text-center text-gray-400 font-medium">Aucun garage enregistré.</td></tr>
+            ) : (
+              garages.map((g) => (
+                <tr key={g._id} className="border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
+                  <td className="px-8 py-5 font-black text-gray-900">{g.name}</td>
+                  <td className="px-8 py-5">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-[#00adef]/10 text-[#00adef]">{g.type}</span>
+                  </td>
+                  <td className="px-8 py-5 text-gray-600 text-sm">{g.address || "-"}</td>
+                  <td className="px-8 py-5">
+                    <span className={`text-xs font-black ${g.isSubscribed ? "text-green-600" : "text-red-500"}`}>
+                      {g.isSubscribed ? "Actif" : "Inactif"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleSubscription(g._id, 1)}
+                      className="ml-2 text-xs bg-gray-100 px-2 py-1 rounded-lg font-bold cursor-pointer border-none hover:bg-gray-200"
+                      title="Ajouter 1 mois"
+                    >
+                      +1 mois
+                    </button>
+                  </td>
+                  <td className="px-8 py-5">
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => handleEdit(g)} className="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-2xl font-black cursor-pointer border-none"><FaEdit /> Edit</button>
+                      <button type="button" onClick={() => handleDelete(g._id)} disabled={deletingId === g._id} className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-2xl font-black disabled:opacity-60 cursor-pointer border-none"><FaTrash /> {deletingId === g._id ? "..." : "Delete"}</button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -728,7 +517,6 @@ const GaragesPanel = () => {
   );
 };
 
-// 📦 4. لوحة تحكم المنتجات والسلع (نفس الكود القديم ديالك بدون أي تعديل خارق)
 const ProductsPanel = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -742,6 +530,7 @@ const ProductsPanel = () => {
 
   useEffect(() => {
     let cancelled = false;
+
     const load = async () => {
       try {
         setLoading(true);
@@ -754,6 +543,7 @@ const ProductsPanel = () => {
         if (!cancelled) setLoading(false);
       }
     };
+
     load();
     return () => { cancelled = true; };
   }, []);
@@ -813,7 +603,7 @@ const ProductsPanel = () => {
       resetForm();
       await reloadProducts();
     } catch (err) {
-      showNotification(err.message, "error");
+      showNotification(`Endpoint requis: ${editingId ? "PUT" : "POST"} /api/products${editingId ? `/${editingId}` : ""} — ${err.message}`, "error");
     } finally {
       setSaving(false);
     }
@@ -827,7 +617,7 @@ const ProductsPanel = () => {
       showNotification("Produit supprimé", "success");
       await reloadProducts();
     } catch (err) {
-      showNotification(err.message, "error");
+      showNotification(`Endpoint requis: DELETE /api/products/${id} — ${err.message}`, "error");
     } finally {
       setDeletingId("");
     }
@@ -837,7 +627,10 @@ const ProductsPanel = () => {
 
   return (
     <div className="space-y-8">
-      {error && <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm font-medium">{error}</div>}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm font-medium">{error}</div>
+      )}
+
       <div className="bg-gray-50 rounded-[2.5rem] p-6 border border-gray-100">
         <div className="flex items-center gap-3 mb-6">
           {editingId ? <FaEdit className="text-[#00adef]" /> : <FaPlus className="text-[#00adef]" />}
@@ -859,7 +652,11 @@ const ProductsPanel = () => {
             <button type="submit" disabled={saving} className="inline-flex items-center gap-2 bg-[#00adef] text-white px-6 py-3 rounded-2xl font-black disabled:opacity-60 cursor-pointer border-none">
               <FaSave /> {saving ? "En cours..." : editingId ? "Mettre à jour" : "Créer"}
             </button>
-            {editingId && <button type="button" onClick={resetForm} className="inline-flex items-center gap-2 bg-gray-200 text-gray-900 px-6 py-3 rounded-2xl font-black cursor-pointer border-none">Annuler</button>}
+            {editingId && (
+              <button type="button" onClick={resetForm} className="inline-flex items-center gap-2 bg-gray-200 text-gray-900 px-6 py-3 rounded-2xl font-black cursor-pointer border-none">
+                Annuler
+              </button>
+            )}
           </div>
         </form>
       </div>
@@ -876,22 +673,26 @@ const ProductsPanel = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => (
-              <tr key={p._id} className="border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
-                <td className="px-8 py-5 font-black text-gray-900">{p.name}</td>
-                <td className="px-8 py-5">
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-500/10 text-amber-600">{p.category}</span>
-                </td>
-                <td className="px-8 py-5 font-bold text-gray-900">{p.price} DH</td>
-                <td className="px-8 py-5 text-gray-600">{p.stock ?? "-"}</td>
-                <td className="px-8 py-5">
-                  <div className="flex items-center gap-2">
-                    <button type="button" onClick={() => handleEdit(p)} className="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-2xl font-black cursor-pointer border-none"><FaEdit /> Edit</button>
-                    <button type="button" onClick={() => handleDelete(p._id)} disabled={deletingId === p._id} className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-2xl font-black disabled:opacity-60 cursor-pointer border-none"><FaTrash /> {deletingId === p._id ? "..." : "Delete"}</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {products.length === 0 ? (
+              <tr><td colSpan={5} className="px-8 py-12 text-center text-gray-400 font-medium">Aucun produit enregistré.</td></tr>
+            ) : (
+              products.map((p) => (
+                <tr key={p._id} className="border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
+                  <td className="px-8 py-5 font-black text-gray-900">{p.name}</td>
+                  <td className="px-8 py-5">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-500/10 text-amber-600">{p.category}</span>
+                  </td>
+                  <td className="px-8 py-5 font-bold text-gray-900">{p.price} DH</td>
+                  <td className="px-8 py-5 text-gray-600">{p.stock ?? "-"}</td>
+                  <td className="px-8 py-5">
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => handleEdit(p)} className="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-2xl font-black cursor-pointer border-none"><FaEdit /> Edit</button>
+                      <button type="button" onClick={() => handleDelete(p._id)} disabled={deletingId === p._id} className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-2xl font-black disabled:opacity-60 cursor-pointer border-none"><FaTrash /> {deletingId === p._id ? "..." : "Delete"}</button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

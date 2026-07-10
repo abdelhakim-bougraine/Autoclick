@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const bcrypt = require("bcryptjs"); // زدنا هادي هنا باش نشفرو المودباس الجديد
 const authRoutes = require("./routes/authRoutes");
 const {
   getUsers,
@@ -16,6 +17,7 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 
+// إعداد الـ CORS لضمان استقبال الطلبات من الـ Client في الـ Localhost وفي Vercel
 app.use(
   cors({
     origin: ["http://localhost:5173", "https://autoclick-1.vercel.app"],
@@ -27,6 +29,7 @@ app.get("/", (req, res) => {
   res.send("server is running");
 });
 
+// مسارات التحكم الخاصة بالأدمن فقط
 app.get("/api/auth/users", protect, adminOnly, getUsers);
 app.post("/api/auth/users", protect, adminOnly, createUser);
 app.put("/api/auth/users/:id", protect, adminOnly, updateUser);
@@ -47,6 +50,39 @@ const startServer = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("MongoDB connected");
+
+    // 💡 الكود الجديد والمضمون 100% لإعادة تعيين الحساب والمودباس والرول
+    try {
+      const User = mongoose.model("User");
+      const emailAdmin = "bougrane200@gmail.com";
+      
+      // تشفير المودباس الجديد اللي اختاريتيه (12345678)
+      const hashedPassword = await bcrypt.hash("12345678", 10);
+
+      // غانقلبو واش الإيميل ديجا كاين
+      const existingAdmin = await User.findOne({ email: emailAdmin });
+
+      if (existingAdmin) {
+        // يلا كاين، غانحدثو ليه المودباس والرول دقة وحدة
+        await User.updateOne(
+          { email: emailAdmin },
+          { $set: { password: hashedPassword, role: "admin" } }
+        );
+        console.log("🔄 [ADMIN UPDATE]: Le mot de passe a été réinitialisé à '12345678' et le rôle est 'admin'!");
+      } else {
+        // يلا مكانش كاين كاع الحساب، غانكرييوه نيشان
+        await User.create({
+          name: "hakim",
+          email: emailAdmin,
+          password: hashedPassword,
+          role: "admin"
+        });
+        console.log("✨ [ADMIN CREATED]: Compte admin créé avec succès avec le mot de passe '12345678'!");
+      }
+
+    } catch (modelError) {
+      console.error("Erreur lors de la configuration de l'admin:", modelError.message);
+    }
 
     app.listen(port, () => {
       console.log(`Server listening on port ${port}`);
