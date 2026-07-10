@@ -20,7 +20,7 @@ const port = process.env.PORT || 5000;
 // إعداد الـ CORS لضمان استقبال الطلبات من الـ Client في الـ Localhost وفي Vercel
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://autoclick-1.vercel.app"],
+    origin: [, ],
   }),
 );
 app.use(express.json());
