@@ -1,10 +1,19 @@
+const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL;
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+  configuredBaseUrl || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 export async function request(path, options = {}) {
+  if (!API_BASE_URL) {
+    throw new Error("API URL not configured. Set VITE_API_BASE_URL in frontend env.");
+  }
+
   const { headers: customHeaders, ...requestOptions } = options;
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const normalizedBase = API_BASE_URL.endsWith("/")
+    ? API_BASE_URL.slice(0, -1)
+    : API_BASE_URL;
+
+  const response = await fetch(`${normalizedBase}${path}`, {
     ...requestOptions,
     headers: {
       "Content-Type": "application/json",

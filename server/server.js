@@ -17,13 +17,45 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+].filter(Boolean);
+
+const corsOptions = {
+  origin(origin, callback) {
+    // Allow tools and non-browser requests that do not send Origin.
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
+};
+
+const connectToDatabase = async () => {
+  if (mongoose.connection.readyState === 1) return;
+  await mongoose.connect(process.env.MONGO_URI);
+  console.log("MongoDB connected");
+};
+
 // إعداد الـ CORS لضمان استقبال الطلبات من الـ Client في الـ Localhost وفي Vercel
 app.use(
-  cors({
-    origin: [, ],
-  }),
+  cors(corsOptions),
 );
 app.use(express.json());
+
+app.use(async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    res.status(500).json({ message: "Database connection error" });
+  }
+});
 
 app.get("/", (req, res) => {
   res.send("server is running");
@@ -48,8 +80,7 @@ module.exports = app;
 
 const startServer = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("MongoDB connected");
+    await connectToDatabase();
 
     // 💡 الكود الجديد والمضمون 100% لإعادة تعيين الحساب والمودباس والرول
     try {
