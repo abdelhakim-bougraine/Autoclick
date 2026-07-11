@@ -1,10 +1,13 @@
-const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL;
+const configuredBaseUrl =
+  import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
 const API_BASE_URL =
   configuredBaseUrl || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 export async function request(path, options = {}) {
   if (!API_BASE_URL) {
-    throw new Error("API URL not configured. Set VITE_API_BASE_URL in frontend env.");
+    throw new Error(
+      "API URL not configured. Set VITE_API_BASE_URL (or VITE_API_URL) in frontend env.",
+    );
   }
 
   const { headers: customHeaders, ...requestOptions } = options;
@@ -13,13 +16,22 @@ export async function request(path, options = {}) {
     ? API_BASE_URL.slice(0, -1)
     : API_BASE_URL;
 
-  const response = await fetch(`${normalizedBase}${path}`, {
-    ...requestOptions,
-    headers: {
-      "Content-Type": "application/json",
-      ...(customHeaders || {}),
-    },
-  });
+  const endpoint = `${normalizedBase}${path}`;
+
+  let response;
+  try {
+    response = await fetch(endpoint, {
+      ...requestOptions,
+      headers: {
+        "Content-Type": "application/json",
+        ...(customHeaders || {}),
+      },
+    });
+  } catch {
+    throw new Error(
+      "Network error: cannot reach API. Check VITE_API_BASE_URL/VITE_API_URL, backend deployment, and CORS (CLIENT_URL).",
+    );
+  }
 
   const rawBody = await response.text();
 
